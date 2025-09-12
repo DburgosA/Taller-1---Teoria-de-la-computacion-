@@ -1,0 +1,233 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{multicol}
+\usepackage{cite}
+\usepackage{listings}
+\usepackage{xcolor}
+\geometry{top=1.5cm, bottom=2cm, left=1.5cm, right=1.5cm}
+
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+
+% Configuración para código fuente
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!60!black},
+  stringstyle=\color{red},
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  breaklines=true,
+  showstringspaces=false
+}
+
+% -------------------------
+% IDENTIFICACIÓN DEL GRUPO
+% -------------------------
+\title{Implementación de un Sistema de Validación de Patrones\\mediante Expresiones Regulares}
+\author{
+Demian  Binimelis , Ignacio  Cancino, Daniel Burgos \\
+dbinimelis2022@alu.uct.cl, icancino2021@alu.uct.cl, dburgos2016@alu.uct.cl \\
+Taller 1, INFO1148, Semestre II-2025
+}
+\date{}
+
+\renewcommand{\abstractname}{Resumen}
+
+\begin{document}
+\maketitle
+
+% -------------------------
+% RESUMEN
+% -------------------------
+\begin{abstract}
+Este informe presenta el desarrollo de un sistema de validación de patrones utilizando expresiones regulares como parte del Taller 1 de Teoría de la Computación. El objetivo principal consistió en aplicar conceptos teóricos de expresiones regulares, autómatas finitos y lenguajes regulares para crear un analizador léxico capaz de reconocer y clasificar diferentes tipos de tokens en cadenas de texto.
+
+La metodología empleada siguió un enfoque ágil simplificado, comprendiendo las fases de análisis, diseño, implementación y pruebas. Durante el análisis se identificaron nueve categorías de patrones: correos electrónicos, identificadores, números enteros y reales, contraseñas simples, operadores de incremento, palabras reservadas, y operadores lógicos, aritméticos y relacionales. En la fase de diseño se desarrollaron expresiones regulares específicas para cada patrón, considerando casos válidos e inválidos.
+
+La implementación se realizó en Python utilizando la librería \texttt{re}, desarrollando un programa que procesa archivos de texto y genera una tabla con los resultados de clasificación. Las pruebas incluyeron más de 70 casos de entrada, validando tanto tokens válidos como inválidos para cada categoría definida.
+
+Los resultados demuestran la efectividad de las expresiones regulares para el reconocimiento automático de patrones, proporcionando una base sólida para el desarrollo de analizadores léxicos más complejos en el diseño de compiladores e intérpretes.
+\end{abstract}
+
+% -------------------------
+% INTRODUCCIÓN
+% -------------------------
+\section{Introducción}
+
+Las expresiones regulares constituyen una herramienta fundamental en la teoría de la computación y tienen aplicaciones prácticas extensas en el procesamiento de texto, desarrollo de compiladores, validación de datos y análisis léxico. Este taller tiene como propósito aplicar los conceptos teóricos de expresiones regulares en un contexto práctico, desarrollando un sistema que permita reconocer y validar patrones específicos en cadenas de texto.
+
+\subsection{Objetivo General}
+El objetivo general de este trabajo es que los estudiantes apliquen los conceptos de expresiones regulares en la construcción de un sistema sencillo que permita reconocer y validar patrones en cadenas de texto, empleando una metodología de desarrollo de software estructurada.
+
+\subsection{Objetivos Específicos}
+Los objetivos específicos que guían el desarrollo de este taller son:
+
+\begin{enumerate}
+    \item Comprender la relación entre expresiones regulares, autómatas finitos y lenguajes regulares desde una perspectiva teórica y práctica.
+    \item Diseñar expresiones regulares que validen distintos patrones de uso común en programación y procesamiento de texto.
+    \item Implementar un programa en Python que utilice expresiones regulares para reconocer y clasificar tokens de diferentes categorías.
+    \item Aplicar una metodología de desarrollo de software en el desarrollo del taller, incluyendo las fases de análisis, diseño, implementación y pruebas.
+    \item Elaborar un informe técnico con la descripción completa del trabajo realizado, siguiendo estándares académicos.
+\end{enumerate}
+
+\subsection{Contexto y Motivación}
+En el desarrollo de software moderno, la capacidad de procesar y validar información textual es crucial. Desde la validación de formularios web hasta el análisis sintáctico en compiladores, las expresiones regulares proporcionan un mecanismo eficiente y elegante para reconocer patrones complejos. Este taller simula el desarrollo de un analizador léxico básico, componente esencial en la construcción de intérpretes y compiladores.
+
+\subsection{Estructura del Documento}
+Este informe se organiza de la siguiente manera: la sección 2 presenta los fundamentos teóricos necesarios para comprender las expresiones regulares y su relación con los autómatas finitos; la sección 3 describe el desarrollo del trabajo, incluyendo el análisis de patrones, diseño de expresiones regulares e implementación del sistema; la sección 4 presenta una discusión y reflexión sobre los resultados obtenidos; finalmente, la sección 5 expone las conclusiones y aprendizajes del equipo de trabajo.
+
+
+% -------------------------
+% FUNDAMENTOS TEÓRICOS
+% -------------------------
+\section{Fundamentos teóricos}
+
+Esta sección presenta los conceptos teóricos fundamentales que sustentan el desarrollo del sistema de validación de patrones mediante expresiones regulares.
+
+\subsection{Expresiones Regulares}
+
+Las expresiones regulares (ER) son patrones que describen conjuntos de cadenas de caracteres. Formalmente, una expresión regular sobre un alfabeto $\Sigma$ se define recursivamente como:
+
+\begin{itemize}
+    \item $\emptyset$ es una expresión regular que denota el conjunto vacío
+    \item $\varepsilon$ es una expresión regular que denota el conjunto $\{\varepsilon\}$ (cadena vacía)
+    \item Para cada $a \in \Sigma$, $a$ es una expresión regular que denota el conjunto $\{a\}$
+    \item Si $r$ y $s$ son expresiones regulares, entonces:
+    \begin{itemize}
+        \item $(r + s)$ es una expresión regular (unión)
+        \item $(rs)$ es una expresión regular (concatenación)
+        \item $(r^*)$ es una expresión regular (estrella de Kleene)
+    \end{itemize}
+\end{itemize}
+
+Las expresiones regulares implementadas en lenguajes de programación extienden esta definición básica con operadores adicionales como rangos de caracteres (\texttt{[a-z]}), cuantificadores (\texttt{+}, \texttt{?}), grupos (\texttt{(...)}), y clases de caracteres predefinidas (\texttt{\textbackslash d}, \texttt{\textbackslash w}).
+
+\subsection{Autómatas Finitos}
+
+Un autómata finito determinista (AFD) es una tupla $M = (Q, \Sigma, \delta, q_0, F)$ donde:
+\begin{itemize}
+    \item $Q$ es un conjunto finito de estados
+    \item $\Sigma$ es el alfabeto de entrada
+    \item $\delta: Q \times \Sigma \rightarrow Q$ es la función de transición
+    \item $q_0 \in Q$ es el estado inicial
+    \item $F \subseteq Q$ es el conjunto de estados finales
+\end{itemize}
+
+Los autómatas finitos son equivalentes en poder expresivo a las expresiones regulares, estableciendo una correspondencia fundamental en la teoría de la computación.
+
+\subsection{Lenguajes Regulares}
+
+Un lenguaje $L$ sobre un alfabeto $\Sigma$ es regular si puede ser:
+\begin{enumerate}
+    \item Reconocido por un autómata finito
+    \item Generado por una gramática regular
+    \item Descrito por una expresión regular
+\end{enumerate}
+
+Esta equivalencia permite utilizar diferentes formalismos según las necesidades del problema específico.
+
+\subsection{Análisis Léxico}
+
+El análisis léxico es la primera fase en el procesamiento de lenguajes de programación, donde el código fuente se convierte en una secuencia de tokens. Un token es una unidad léxica básica que representa elementos como identificadores, palabras clave, operadores y literales.
+
+Los analizadores léxicos (lexers) utilizan expresiones regulares para definir patrones que identifican diferentes tipos de tokens. El proceso típico incluye:
+
+\begin{enumerate}
+    \item Definición de patrones mediante expresiones regulares
+    \item Implementación de la lógica de reconocimiento
+    \item Manejo de prioridades cuando múltiples patrones coinciden
+    \item Generación de tokens con su categoría y atributos
+\end{enumerate}
+
+\subsection{Aplicaciones Prácticas}
+
+Las expresiones regulares tienen aplicaciones extensas en:
+
+\begin{itemize}
+    \item \textbf{Validación de datos}: verificación de formatos como correos electrónicos, números de teléfono, códigos postales
+    \item \textbf{Procesamiento de texto}: búsqueda y reemplazo de patrones complejos
+    \item \textbf{Compiladores}: análisis léxico y sintáctico
+    \item \textbf{Bioinformática}: búsqueda de secuencias en ADN y proteínas
+    \item \textbf{Seguridad}: detección de patrones maliciosos en logs y tráfico de red
+\end{itemize}
+
+\subsection{Limitaciones}
+
+Es importante reconocer que las expresiones regulares tienen limitaciones fundamentales. No pueden reconocer lenguajes que requieren memoria ilimitada, como el balanceo de paréntesis anidados o la verificación de que el número de aperturas coincide con el de cierres en estructuras arbitrariamente profundas. Estos problemas requieren formalismos más poderosos como los autómatas de pila o las gramáticas libres de contexto.
+
+% -------------------------
+% DESARROLLO DEL TRABAJO
+% -------------------------
+\section{Desarrollo del trabajo}
+
+% -------------------------
+% DISCUSIÓN Y REFLEXIÓN
+% -------------------------
+\section{Discusión y reflexión}
+
+\subsection{Consideraciones de seguridad}
+
+% -------------------------
+% CONCLUSIONES
+% -------------------------
+\section{Conclusiones}
+
+\begin{itemize}
+    \item \textbf {Demian  Binimelis}: 
+    
+    \item \textbf {Ignacio  Cancino}:
+    
+    \item \textbf {Daniel Burgos}: 
+\end{itemize}
+
+
+% -------------------------
+% REFERENCIAS
+% -------------------------
+\begin{thebibliography}{99}
+\bibitem{hopcroft2001} Hopcroft, J. E., Motwani, R., \& Ullman, J. D. (2001). \textit{Introduction to automata theory, languages, and computation} (2nd ed.). Addison-Wesley.
+
+\bibitem{schneider2015} Schneider, F. B. (2015). \textit{Computer security: Principles and practice} (3rd ed.). Pearson.
+
+% -------------------------
+% ANEXOS
+% -------------------------
+\appendix
+\section{Anexo}
+
+% -------------------------
+% Manual
+% -------------------------
+\section{Manual de usuario}
+
+
+
+
+% -------------------------
+% Bitacora
+% -------------------------
+\section{Bitácora de trabajo}
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{2cm}|p{2.5cm}|p{2.5cm}|p{1cm}|p{5cm}|}
+\hline
+\textbf{Fecha} & \textbf{Actividad} & \textbf{Responsable} & \textbf{Horas} & \textbf{Descripción} \\
+\hline
+23/08/2025 & Análisis del problema & Todos & 2 & Reunión inicial para comprender los requisitos y definir alcance del proyecto. \\
+\hline
+23/08/2025 & Investigación teórica & Ignacio & 3 & Revisión de literatura sobre autómatas finitos y sus aplicaciones en sistemas de seguridad. \\
+\hline
+24/08/2025 & Diseño conceptual & Demian & 2 & Definición del alfabeto de entrada y estados del autómata. \\
+\hline
+\end{tabular}
+\caption{Bitácora detallada del desarrollo del proyecto}
+\label{tab:bitacora}
+\end{table}
+\textbf{Total de horas invertidas:} 24 horas
+
+\end{document}
