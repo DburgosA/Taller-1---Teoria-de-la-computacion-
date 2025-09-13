@@ -1,0 +1,6 @@
+if else while for return break continue IDENTIFIER hola _variable Python3 main_loop init 123 while1 else python Return 0 -1 +42 1234567890 3.14 -0.001 12.0 6.02e23 -1e-9 2E10 0x0 0x7F 0XABC123 0x correo@mail.com
+ test.123@dominio.org
+ user-name@sub.domain.co
+ email@domain.c
+ email@domain.community
+ user@bad abc123 pass12 CLAVE2025 abcdef 123456 A1B2C3 abc123! true False "hola "mundo"" 'texto' "escape \t tab" 'linea\nnueva' "123" '123abc' "" '' "unterminated 'tambien sin cerrar ++ -- + - * / % && || ! == != <= >= < > <= > &&& +- var-1 1var 12. .5 3. -.5 0xG1 _ __
